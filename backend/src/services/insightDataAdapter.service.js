@@ -1,3 +1,5 @@
+// This layer converts DB models → insight inputs
+
 exports.fromQuizAttempt = (row) => ({
   attempts: row.attemptNumber,
   score: row.score,
