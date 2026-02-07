@@ -4,6 +4,9 @@ const fmt = require("../services/alertFormatter.service");
 exports.completeLesson = (req, res) => {
   const { timeSpent, expectedTime } = req.body;
 
+  // TODO: replace req.body with adapter-mapped DB record
+  // const lessonData = adapter.fromLessonProgress(dbRecord);
+
   const pace = insight.lessonPacingInsight({
     timeSpent,
     expectedTime,
