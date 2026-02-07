@@ -3,3 +3,23 @@ node_modules
 .env
 
 /generated/prisma
+
+# Build outputs
+dist
+build
+
+# Test coverage
+coverage
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Database
+*.db
+.prisma/dev.db
+
+# Temporary files
+.tmp
+*.tmp
