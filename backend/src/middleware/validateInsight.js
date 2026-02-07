@@ -1,9 +1,9 @@
 exports.validateQuizSubmit = (req, res, next) => {
-  const { attempts, timeSpent } = req.body;
+  const { userId, quizId } = req.body;
 
-  if (typeof attempts !== "number" || typeof timeSpent !== "number") {
+  if (!userId || !quizId) {
     return res.status(400).json({
-      error: "attempts and timeSpent must be numbers",
+      error: "userId and quizId are required",
     });
   }
 
@@ -11,11 +11,11 @@ exports.validateQuizSubmit = (req, res, next) => {
 };
 
 exports.validateLessonComplete = (req, res, next) => {
-  const { timeSpent, expectedTime } = req.body;
+  const { userId, lessonId } = req.body;
 
-  if (!timeSpent || !expectedTime) {
+  if (!userId || !lessonId) {
     return res.status(400).json({
-      error: "timeSpent and expectedTime required",
+      error: "userId and lessonId are required",
     });
   }
 
