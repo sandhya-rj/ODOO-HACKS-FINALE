@@ -21,7 +21,7 @@ const stats = [
 
 export default function ReportsDashboard() {
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Reports</h1>
         <p className="text-sm text-muted-foreground">
@@ -32,7 +32,7 @@ export default function ReportsDashboard() {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
-          <Card key={stat.label}>
+          <Card key={stat.label} className="border-border/40 rounded-2xl">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-muted-foreground">
@@ -47,7 +47,7 @@ export default function ReportsDashboard() {
       </div>
 
       {/* Progress Table */}
-      <Card>
+      <Card className="border-border/40 rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

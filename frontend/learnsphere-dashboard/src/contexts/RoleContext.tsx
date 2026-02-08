@@ -6,19 +6,28 @@ interface RoleContextType {
   role: Role;
   setRole: (role: Role) => void;
   toggleRole: () => void;
+  isAuthenticated: boolean;
+  setAuthenticated: (auth: boolean) => void;
+  logout: () => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("learner");
+  const [isAuthenticated, setAuthenticated] = useState(false);
 
   const toggleRole = () => {
     setRole(prev => (prev === "learner" ? "instructor" : "learner"));
   };
 
+  const logout = () => {
+    setAuthenticated(false);
+    setRole("learner");
+  };
+
   return (
-    <RoleContext.Provider value={{ role, setRole, toggleRole }}>
+    <RoleContext.Provider value={{ role, setRole, toggleRole, isAuthenticated, setAuthenticated, logout }}>
       {children}
     </RoleContext.Provider>
   );

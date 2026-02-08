@@ -89,7 +89,7 @@ export default function SystemStatusPage() {
                     {isHealthy === null ? 'Checking...' : isHealthy ? 'Connected' : 'Disconnected'}
                   </p>
                   <p className="text-sm text-slate-600">
-                    {import.meta.env.VITE_API_URL || 'http://localhost:3000'}
+                    {import.meta.env.VITE_API_URL || 'http://localhost:5000'}
                   </p>
                 </div>
               </div>

@@ -31,9 +31,9 @@ async function main() {
 
   const learner1 = await prisma.user.upsert({
     where: { email: 'emma.wilson@student.com' },
-    update: {},
+    update: { name: 'Sandhya RJ' },
     create: {
-      name: 'Emma Wilson',
+      name: 'Sandhya RJ',
       email: 'emma.wilson@student.com',
       password: '$2b$10$rKjXZ8QhF5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J',
       role: 'LEARNER',
@@ -42,9 +42,9 @@ async function main() {
 
   const learner2 = await prisma.user.upsert({
     where: { email: 'james.martinez@student.com' },
-    update: {},
+    update: { name: 'Bala Vignesh VT' },
     create: {
-      name: 'James Martinez',
+      name: 'Bala Vignesh VT',
       email: 'james.martinez@student.com',
       password: '$2b$10$rKjXZ8QhF5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J',
       role: 'LEARNER',
@@ -53,9 +53,9 @@ async function main() {
 
   const learner3 = await prisma.user.upsert({
     where: { email: 'olivia.brown@student.com' },
-    update: {},
+    update: { name: 'Prarthana B' },
     create: {
-      name: 'Olivia Brown',
+      name: 'Prarthana B',
       email: 'olivia.brown@student.com',
       password: '$2b$10$rKjXZ8QhF5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J',
       role: 'LEARNER',
@@ -64,10 +64,32 @@ async function main() {
 
   const learner4 = await prisma.user.upsert({
     where: { email: 'noah.davis@student.com' },
-    update: {},
+    update: { name: 'Gopika Sree KC' },
     create: {
-      name: 'Noah Davis',
+      name: 'Gopika Sree KC',
       email: 'noah.davis@student.com',
+      password: '$2b$10$rKjXZ8QhF5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J',
+      role: 'LEARNER',
+    },
+  });
+
+  const learner5 = await prisma.user.upsert({
+    where: { email: 'manasa.r@student.com' },
+    update: { name: 'Manasa R' },
+    create: {
+      name: 'Manasa R',
+      email: 'manasa.r@student.com',
+      password: '$2b$10$rKjXZ8QhF5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J',
+      role: 'LEARNER',
+    },
+  });
+
+  const learner6 = await prisma.user.upsert({
+    where: { email: 'rithvik.t@student.com' },
+    update: { name: 'Rithvik T' },
+    create: {
+      name: 'Rithvik T',
+      email: 'rithvik.t@student.com',
       password: '$2b$10$rKjXZ8QhF5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J5K5J',
       role: 'LEARNER',
     },

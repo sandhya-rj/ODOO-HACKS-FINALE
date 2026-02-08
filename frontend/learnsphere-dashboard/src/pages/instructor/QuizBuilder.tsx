@@ -13,7 +13,7 @@ export default function QuizBuilder() {
   const question = questions[selectedQuestion];
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Quiz Builder</h1>
@@ -21,7 +21,7 @@ export default function QuizBuilder() {
             Create and manage quiz questions
           </p>
         </div>
-        <Button>
+        <Button className="rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:opacity-90">
           <Plus className="h-4 w-4 mr-2" />
           Add Question
         </Button>
@@ -30,7 +30,7 @@ export default function QuizBuilder() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Question List */}
         <div className="lg:col-span-3">
-          <Card>
+          <Card className="border-border/40 rounded-2xl">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm">
                 Questions ({questions.length})
@@ -41,7 +41,7 @@ export default function QuizBuilder() {
                 <button
                   key={q.id}
                   onClick={() => setSelectedQuestion(idx)}
-                  className={`w-full text-left p-3 rounded-lg text-sm transition-colors ${
+                  className={`w-full text-left p-3 rounded-xl text-sm transition-colors ${
                     selectedQuestion === idx
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -57,7 +57,7 @@ export default function QuizBuilder() {
 
         {/* Question Editor */}
         <div className="lg:col-span-6">
-          <Card>
+          <Card className="border-border/40 rounded-2xl">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm">
@@ -87,7 +87,7 @@ export default function QuizBuilder() {
                 <Label className="mb-3 block">Answer Options</Label>
                 <div className="space-y-2">
                   {question.options.map((option, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
+                    <div key={`${question.id}-option-${idx}`} className="flex items-center gap-3">
                       <button className="flex-shrink-0">
                         {idx === question.correctAnswer ? (
                           <CheckCircle2 className="h-5 w-5 text-success" />
@@ -117,7 +117,7 @@ export default function QuizBuilder() {
 
         {/* Rewards Panel */}
         <div className="lg:col-span-3">
-          <Card>
+          <Card className="border-border/40 rounded-2xl">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Award className="h-4 w-4 text-warning" />

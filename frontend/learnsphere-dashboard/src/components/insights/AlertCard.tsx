@@ -57,14 +57,14 @@ export function AlertCard({ alert, className }: AlertCardProps) {
   return (
     <div
       className={cn(
-        'rounded-lg border-2 p-4 transition-all hover:shadow-sm',
+        'rounded-xl border-2 p-4 transition-all hover:shadow-md',
         config.border,
         config.bg,
         className
       )}
     >
       <div className="flex items-start gap-3">
-        <div className={cn('p-2 rounded-lg bg-white/50', config.iconColor)}>
+        <div className={cn('p-2 rounded-xl bg-white/50', config.iconColor)}>
           <Icon className="h-5 w-5" />
         </div>
         

@@ -12,14 +12,17 @@ import {
   HelpCircle,
   Paperclip,
   X,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockCourses } from "@/data/mockData";
-import { AlertCard } from "@/components/insights/AlertCard";
-import type { Alert } from "@/lib/api";
+import { LearnerInsightsPanel } from "@/components/insights/LearnerInsightsPanel";
+import { useProgress } from "@/hooks/useProgress";
+import { useToast } from "@/hooks/use-toast";
+import { getLessonImage } from '@/data/courseImages';
 
 interface LessonProgress {
   lessonId: string;
@@ -34,30 +37,21 @@ const typeIcons = {
   quiz: HelpCircle,
 };
 
-// Mock lesson-specific alerts
-const mockLessonAlerts: Alert[] = [
-  {
-    alertId: "alert_lesson_001",
-    type: "quiz_performance",
-    message: "You've attempted this quiz 3 times. Consider reviewing the lesson material before your next attempt.",
-    severity: "medium",
-    source: "ai_insight_engine",
-    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 mins ago
-  },
-  {
-    alertId: "alert_lesson_002",
-    type: "progress_milestone",
-    message: "Great progress! You've completed 70% of this course.",
-    severity: "low",
-    source: "progress_tracker",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-  },
-];
-
 export default function LessonPlayer() {
   const { courseId, lessonId } = useParams();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { toast } = useToast();
+  
+  // Demo: hard-coded userId (in production, get from auth context)
+  const DEMO_USER_ID = 1;
+  const DEMO_USER_UUID = "cac7caff-6f69-483f-a39d-50abbf8f54ac"; // Sandhya RJ
+  
+  // Progress hook for backend integration
+  const { isLoading: isCompletingLesson } = useProgress(DEMO_USER_ID);
+  
+  // Course completion state
+  const [isCompletingCourse, setIsCompletingCourse] = useState(false);
   
   // Lesson progress state: tracks completion and time spent for each lesson
   const [lessonProgressMap, setLessonProgressMap] = useState<Record<string, LessonProgress>>({});
@@ -116,13 +110,13 @@ export default function LessonPlayer() {
   const ContentIcon = typeIcons[lesson.type];
 
   // Mark current lesson as completed and navigate to next lesson
-  const handleNextLesson = () => {
-    if (!nextLesson) return;
+  const handleNextLesson = async () => {
+    if (!nextLesson || isCompletingLesson) return;
 
     // Calculate time spent on current lesson
     const timeSpentSeconds = Math.floor((Date.now() - lessonStartTime) / 1000);
 
-    // Update lesson progress state
+    // Update local lesson progress state immediately for UI responsiveness
     setLessonProgressMap((prev) => ({
       ...prev,
       [lesson.id]: {
@@ -132,23 +126,100 @@ export default function LessonPlayer() {
       },
     }));
 
-    // TODO: POST /lesson/complete
-    // Send completion data to backend:
-    // {
-    //   lessonId: lesson.id,
-    //   courseId: courseId,
-    //   timeSpentSeconds: timeSpentSeconds,
-    //   completedAt: new Date().toISOString()
-    // }
-
-    // Navigate to next lesson
+    // Navigate to next lesson — lesson progress is tracked locally for the demo
     navigate(`/lesson/${courseId}/${nextLesson.id}`);
+  };
+
+  const isLastLesson = lessonIndex === course.lessons.length - 1;
+
+  // Handle course completion from the last lesson
+  const handleCompleteCourse = async () => {
+    if (isCompletingCourse) return;
+    setIsCompletingCourse(true);
+
+    // Mark last lesson as completed locally
+    setLessonProgressMap((prev) => ({
+      ...prev,
+      [lesson.id]: {
+        lessonId: lesson.id,
+        completed: true,
+        timeSpentSeconds: Math.floor((Date.now() - lessonStartTime) / 1000),
+      },
+    }));
+
+    // Map frontend course ID to backend course ID
+    const courseIdMap: Record<string, string> = {
+      '1': 'course-javascript-fundamentals',
+      '2': 'course-react-essentials',
+      '3': 'course-javascript-fundamentals',
+      '4': 'course-react-essentials',
+      '5': 'course-javascript-fundamentals',
+      '6': 'course-react-essentials',
+    };
+
+    const backendCourseId = courseIdMap[courseId || ''] || 'course-javascript-fundamentals';
+
+    try {
+      const response = await fetch('http://localhost:5000/courses/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: DEMO_USER_UUID,
+          courseId: backendCourseId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && !data.alreadyCompleted) {
+        // Track completion per frontend course ID
+        const completedCourses = JSON.parse(sessionStorage.getItem('completedCourses') || '{}');
+        completedCourses[courseId || ''] = true;
+        sessionStorage.setItem('completedCourses', JSON.stringify(completedCourses));
+
+        // Trigger leaderboard refresh
+        window.dispatchEvent(new CustomEvent('leaderboard-refresh'));
+
+        toast({
+          title: 'Course Completed!',
+          description: `${course.title} — +${data.data?.pointsAwarded || 100} points awarded!`,
+        });
+
+        window.dispatchEvent(new CustomEvent('learnsphere-notification', {
+          detail: {
+            type: 'COURSE_COMPLETED',
+            title: 'Course Completed!',
+            message: `You completed "${course.title}"`,
+            points: data.data?.pointsAwarded || 100,
+            instructorNotified: true,
+            instructorName: data.data?.instructorName || 'Michael Chen',
+          }
+        }));
+      } else if (data.alreadyCompleted) {
+        toast({
+          title: 'Already Completed',
+          description: 'You\'ve already completed this course.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to complete course:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to submit course completion. Try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCompletingCourse(false);
+    }
+
+    // Navigate back to course detail
+    navigate(`/course/${courseId}`);
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top Bar */}
-      <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-4 flex-shrink-0">
+      <header className="h-14 border-b border-border/40 bg-card/80 backdrop-blur-md flex items-center px-4 gap-4 flex-shrink-0">
         <Link
           to={`/course/${courseId}`}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -188,8 +259,17 @@ export default function LessonPlayer() {
               </h1>
 
               {/* Content Viewer Placeholder */}
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center border border-border mb-6">
-                <div className="text-center">
+              <div className="aspect-video bg-muted/50 rounded-2xl flex items-center justify-center border border-border/40 mb-6 overflow-hidden">
+                <img 
+                  src={getLessonImage(lesson.id, 'video')}
+                  alt={lesson.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="text-center hidden">
                   <ContentIcon className="h-16 w-16 text-muted-foreground/40 mx-auto mb-2" />
                   <p className="text-muted-foreground text-sm">
                     {lesson.type.charAt(0).toUpperCase() + lesson.type.slice(1)}{" "}
@@ -203,20 +283,19 @@ export default function LessonPlayer() {
                 placeholder for the actual lesson material.
               </p>
 
-              {/* Lesson-specific Alerts */}
-              {mockLessonAlerts.length > 0 && (
-                <div className="mt-6 space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground">Insights & Alerts</h3>
-                  {mockLessonAlerts.map((alert) => (
-                    <AlertCard key={alert.alertId} alert={alert} />
-                  ))}
-                </div>
-              )}
+              {/* Learning Insights — real-time, per-course */}
+              <div className="mt-6">
+                <LearnerInsightsPanel
+                  courseId={courseId || '1'}
+                  courseName={course.title}
+                  compact
+                />
+              </div>
             </div>
           </div>
 
           {/* Bottom Navigation */}
-          <div className="h-16 border-t border-border bg-card flex items-center justify-between px-6 flex-shrink-0">
+          <div className="h-16 border-t border-border/40 bg-card/80 backdrop-blur-md flex items-center justify-between px-6 flex-shrink-0">
             <Button
               variant="outline"
               disabled={!prevLesson}
@@ -224,24 +303,41 @@ export default function LessonPlayer() {
                 prevLesson &&
                 navigate(`/lesson/${courseId}/${prevLesson.id}`)
               }
+              className="rounded-xl"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <Button
-              disabled={!nextLesson}
-              onClick={handleNextLesson}
-            >
-              Next Lesson
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+            {isLastLesson ? (
+              <Button
+                onClick={handleCompleteCourse}
+                disabled={isCompletingCourse}
+                className="bg-success hover:bg-success/90 text-white rounded-xl"
+              >
+                {isCompletingCourse ? "Completing..." : (
+                  <>
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Complete Course
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                disabled={!nextLesson || isCompletingLesson}
+                onClick={handleNextLesson}
+                className="rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:opacity-90"
+              >
+                {isCompletingLesson ? "Completing..." : "Next Lesson"}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Sidebar */}
         {sidebarOpen && (
-          <aside className="w-80 border-l border-border bg-card flex-col overflow-hidden hidden md:flex flex-shrink-0">
-            <div className="p-4 border-b border-border">
+          <aside className="w-80 border-l border-border/40 bg-card flex-col overflow-hidden hidden md:flex flex-shrink-0">
+            <div className="p-4 border-b border-border/40">
               <h3 className="font-semibold text-foreground text-sm mb-2">
                 {course.title}
               </h3>
@@ -252,7 +348,7 @@ export default function LessonPlayer() {
                   </span>
                   <span>{progressPercent}%</span>
                 </div>
-                <Progress value={progressPercent} className="h-1.5" />
+                <Progress value={progressPercent} className="h-1.5 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-blue-500" />
               </div>
             </div>
             <ScrollArea className="flex-1">
@@ -283,7 +379,7 @@ export default function LessonPlayer() {
                 })}
               </div>
             </ScrollArea>
-            <div className="p-4 border-t border-border">
+            <div className="p-4 border-t border-border/40">
               <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                 <Paperclip className="h-3 w-3" />
                 Attachments

@@ -34,6 +34,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -115,7 +116,7 @@ export default function CourseEditor() {
       </div>
 
       {/* Course Fields */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-border/40 rounded-2xl">
         <CardContent className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -145,7 +146,7 @@ export default function CourseEditor() {
             </div>
             <div>
               <Label>Course Image</Label>
-              <div className="mt-1.5 border-2 border-dashed border-border rounded-lg p-6 text-center">
+              <div className="mt-1.5 border-2 border-dashed border-border/40 rounded-xl p-6 text-center">
                 <Upload className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground">
                   Drop image or click to upload
@@ -180,6 +181,9 @@ export default function CourseEditor() {
               <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Add Lesson</DialogTitle>
+                  <DialogDescription>
+                    Create a new lesson by adding content, description, and attachments.
+                  </DialogDescription>
                 </DialogHeader>
                 <Tabs defaultValue="lesson-content" className="mt-2">
                   <TabsList className="w-full">
@@ -271,7 +275,7 @@ export default function CourseEditor() {
               return (
                 <div
                   key={lesson.id}
-                  className="flex items-center gap-4 p-3 bg-card rounded-lg border border-border"
+                  className="flex items-center gap-4 p-3 bg-card rounded-xl border border-border/40"
                 >
                   <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">

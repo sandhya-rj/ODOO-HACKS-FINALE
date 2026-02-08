@@ -26,7 +26,7 @@ export function MobileNav() {
   const navItems = role === "instructor" ? instructorNav : learnerNav;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex items-center justify-around h-16 px-2">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/40 flex items-center justify-around h-16 px-2 shadow-lg shadow-black/[0.03]">
       {navItems.map((item) => {
         const isActive =
           location.pathname === item.path ||
@@ -35,11 +35,11 @@ export function MobileNav() {
           <Link
             key={item.path}
             to={item.path}
-            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               isActive ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            <item.icon className="h-5 w-5" />
+            <item.icon className={`h-5 w-5 ${isActive ? "text-primary" : ""}`} />
             {item.label}
           </Link>
         );
